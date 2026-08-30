@@ -1,0 +1,50 @@
+---
+# Connection profile for the AICTE SecureDC Fabric 2.5 test network.
+# Documents peer and orderer endpoints. fabric-anchor uses explicit MSP paths, not this file.
+# This network uses cryptogen (no Fabric CA). Production must replace this with CA-issued identities.
+
+name: aicte-securedc-test-network
+version: "1.0.0"
+client:
+  organization: Aicte
+  connection:
+    timeout:
+      peer:
+        endorser: "300"
+
+organizations:
+  Aicte:
+    mspid: AicteMSP
+    peers:
+      - peer0.securedc.aicte.gov.in
+  OrdererOrg:
+    mspid: OrdererMSP
+    orderers:
+      - orderer.aicte.gov.in
+
+orderers:
+  orderer.aicte.gov.in:
+    url: grpcs://localhost:7050
+    grpcOptions:
+      ssl-target-name-override: orderer.aicte.gov.in
+    tlsCACerts:
+      path: organizations/ordererOrganizations/aicte.gov.in/orderers/orderer.aicte.gov.in/tls/ca.crt
+
+peers:
+  peer0.securedc.aicte.gov.in:
+    url: grpcs://localhost:7051
+    grpcOptions:
+      ssl-target-name-override: peer0.securedc.aicte.gov.in
+    tlsCACerts:
+      path: organizations/peerOrganizations/securedc.aicte.gov.in/peers/peer0.securedc.aicte.gov.in/tls/ca.crt
+
+channels:
+  auditchannel:
+    orderers:
+      - orderer.aicte.gov.in
+    peers:
+      peer0.securedc.aicte.gov.in:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true

@@ -1,0 +1,23 @@
+OrdererOrgs:
+  - Name: Orderer
+    Domain: aicte.gov.in
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - localhost
+          - 127.0.0.1
+          - orderer.aicte.gov.in
+
+PeerOrgs:
+  - Name: Aicte
+    Domain: securedc.aicte.gov.in
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+      SANS:
+        - localhost
+        - 127.0.0.1
+        - peer0.securedc.aicte.gov.in
+    Users:
+      Count: 1

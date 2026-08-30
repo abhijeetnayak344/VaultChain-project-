@@ -1,0 +1,129 @@
+---
+# Test-network channel config for AICTE SecureDC.
+# cryptogen + this file are for local/dev only. Production must use Fabric CA.
+
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: organizations/ordererOrganizations/aicte.gov.in/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - orderer.aicte.gov.in:7050
+
+  - &AicteOrg
+    Name: AicteOrg
+    ID: AicteMSP
+    MSPDir: organizations/peerOrganizations/securedc.aicte.gov.in/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('AicteMSP.admin', 'AicteMSP.peer', 'AicteMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('AicteMSP.admin', 'AicteMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('AicteMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('AicteMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.securedc.aicte.gov.in
+        Port: 7051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.aicte.gov.in:7050
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.aicte.gov.in
+        Port: 7050
+        ClientTLSCert: organizations/ordererOrganizations/aicte.gov.in/orderers/orderer.aicte.gov.in/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/aicte.gov.in/orderers/orderer.aicte.gov.in/tls/server.crt
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  Capabilities:
+    <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  AicteChannel:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *AicteOrg
